@@ -1,0 +1,1 @@
+{"options":{},"indexes":[{"v":{"$numberInt":"2"},"key":{"_id":{"$numberInt":"1"}},"name":"_id_"},{"v":{"$numberInt":"2"},"key":{"cust_id":{"$numberInt":"1"},"price":{"$numberInt":"1"}},"name":"composite_idx"},{"v":{"$numberInt":"2"},"key":{"cust_id":{"$numberInt":"1"}},"name":"cust_id"}],"uuid":"6a688b63e14b44f6b5062c00de2e27bc"}
