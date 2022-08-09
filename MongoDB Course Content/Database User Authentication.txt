@@ -1,0 +1,337 @@
+Opening the file mongod.conf:
+
+
+COPY
+vi mongod.conf
+The new section of the configuration file that enables authentication and authorization:
+
+
+COPY
+security:
+  authorization: enabled
+Shutting down the server:
+
+
+COPY
+mongo admin --port 27001 --eval 'db.shutdownServer()'
+Restarting the server with mongod.conf:
+
+
+COPY
+mongod -f mongod.conf
+Connecting to MongoDB on port 27001:
+
+
+COPY
+mongo --port 27001
+Running a find() query on the accounts database:
+
+
+COPY
+db.accounts.find( {}, { name: 1, ssn: 1 } )
+
+
+
+==================================================================
+
+Printing out the configuration file:
+
+
+COPY
+cat ~/workspace/mongod.conf
+Connecting to MongoDB:
+
+
+COPY
+mongo --host localhost:27001
+Retrieving all users:
+
+
+COPY
+db.getUsers()
+Switching to the admin database:
+
+
+COPY
+use admin
+Creating the user administrator:
+
+
+COPY
+db.createUser({
+  user: "globalAdminUser",
+  pwd: "5xd49$4%0bef#6c&b*d",
+  roles: [ { role: "userAdminAnyDatabase", db: "admin" } ]
+});
+Authenticating as the user administrator:
+
+
+COPY
+db.auth( "globalAdminUser", "5xd49$4%0bef#6c&b*d" )
+Creating a cluster administrator:
+
+
+COPY
+db.createUser({
+  user: "clusterAdminAny",
+  pwd: "a*0f7@2c6#b4f%$d6c^c7d",
+  roles: [ "clusterAdmin" ]
+});
+
+
+
+Creating a global user administrator:
+
+
+COPY
+use admin
+db.createUser({
+  user: "globalAdminUser",
+  pwd: "5xd49$4%0bef#6c&b*d",
+  roles: [ {
+    role: "userAdminAnyDatabase",
+    db: "admin"
+  } ]
+});
+Creating a user administrator on the inventory database:
+
+
+COPY
+use admin
+db.createUser({
+  user: "inventoryAdminUser",
+  pwd: "f46*5$2a3%ac&43f@17b",
+  roles: [
+    { role: "userAdmin", db: "inventory" }
+  ]
+});
+Creating a user without any privileges:
+
+
+COPY
+use admin
+db.createUser({
+  user: "inventoryAdminUser",
+  pwd: "4lf12$@0af0e4*9#8af",
+  roles: [ ]
+});
+Granting a user the userAdmin privilege on the inventory database:
+
+
+COPY
+db.grantRolesToUser(
+   "inventoryAdminUser",
+   [ { role: "userAdmin", db: "inventory" } ]
+)
+
+
+Your objective is to create the following users on the admin database:
+
+reportsUser
+Roles: read on the reports database
+reportsOwner
+Roles: dbOwner on the reports database
+clusterManagerUser
+Roles: clusterManager on the admin database
+When creating these users, you will need to assign passwords for each user. 
+The passwords should be secure, but you will not be evaluated on the strength of each password.
+
+db.createUser({ user: "reportsUser", pwd: "5xd49$4%0bef#6c&b*d", roles: [{role: "read", db: "reports"}]});
+db.createUser({ user: "reportsOwner", pwd: "5xd49$4%0bef#6c&b*d", roles: [{role: "dbOwner", db: "reports"}]});
+db.createUser({ user: "clusterManagerUser", pwd: "6@09%aef&5d41!d37", roles: [{role: "clusterManager", db: "admin"}]});
+
+
+If you want to learn about the operations associated with a specific privilege action, visit the Privilege Actions docs page.
+
+Connecting to MongoDB on port 27001:
+
+
+COPY
+mongo admin --port 27001
+Authenticating as the user administrator:
+
+
+COPY
+db.auth("globalAdminUser", "5xd49$4%0bef#6c&b*d")
+Creating a new role grantRevokeRolesAnyDatabase:
+
+
+COPY
+db.createRole(
+ {
+   role: "grantRevokeRolesAnyDatabase",
+   privileges: [
+     {
+        resource: { db: "", collection: "" },
+        actions: [ "grantRole", "revokeRole", "viewRole" ]
+     }
+   ],
+   roles: []
+ }
+)
+Retrieving all roles:
+
+
+COPY
+db.getRoles()
+
+
+db.createRole(
+ {
+   role: "insertAndFindTransactions",
+   privileges: [
+     {
+        resource: { db: "transactions", collection: "" },
+        actions: [ "insert", "find" ]
+     }
+   ],
+   roles: []
+ }
+)
+
+
+db.updateUser(
+   "<username>",
+   {
+     customData : { <any information> },
+     roles : [
+       { role: "<role>", db: "<database>" } | "<role>",
+       ...
+     ],
+     pwd: passwordPrompt(),      // Or  "<cleartext password>"
+     authenticationRestrictions: [
+        {
+          clientSource: ["<IP>" | "<CIDR range>", ...],
+          serverAddress: ["<IP>", | "<CIDR range>", ...]
+        },
+        ...
+     ],
+     mechanisms: [ "<SCRAM-SHA-1|SCRAM-SHA-256>", ... ],
+     passwordDigestor: "<server|client>"
+   },
+   writeConcern: { <write concern> }
+)
+
+
+
+db.updateUser(
+   "readWriteInventoryUser",
+   {
+     pwd: "6c%dbe&7dc!ee1#d"
+   }
+)
+
+
+==========================================================================================
+
+Identifying one of the keyfiles in the Unix shell:
+
+
+COPY
+ls /var/mongodb/pki/1/mongod-keyfile
+The new section of the configuration file that enables internal authentication:
+
+
+COPY
+security:
+  keyFile: /var/mongodb/pki/1/mongod-keyfile
+Deploying MongoDB with mongod1-auth.conf:
+
+
+COPY
+mongod -f mongod1-auth.conf
+Connecting to MongoDB on port 27001:
+
+
+COPY
+mongo admin --host localhost:27001
+Initiating the replica set:
+
+
+COPY
+rs.initiate()
+Creating the global user administrator:
+
+
+COPY
+db.createUser({
+  user: "globalUserAdmin",
+  pwd: "5xd49$4%0bef#6c&b*d",
+  roles: [ {role: "userAdminAnyDatabase", db: "admin" }]
+});
+Authenticating as the user administrator:
+
+
+COPY
+db.auth( "globalUserAdmin", "5xd49$4%0bef#6c&b*d" )
+
+
+Implement internal authentication in the IDE below.
+
+The following 3 keyfiles have already been created for you:
+
+
+COPY
+security:
+  keyfile: /var/mongodb/pki/node1/keyfile
+/var/mongodb/pki/node2/keyfile
+/var/mongodb/pki/node3/keyfile
+Using these keyfiles, please complete the following steps:
+
+Modify these 3 configuration files to enable internal authentication and reference one of each of the keyfiles. You can check the contents of each file using the file editor in the IDE:
+
+
+COPY
+mongod -f /root/workspace/mongod_1.conf
+mongod -f /root/workspace/mongod_2.conf
+mongod -f /root/workspace/mongod_3.conf
+Start 3 mongod processes using each of the configuration files.
+
+Connect to one of the mongod processes using the following command:
+
+
+COPY
+mongo admin --host localhost:27001
+Initiate the replica set using the following command:
+
+
+COPY
+rs.initiate(
+   {
+      _id: "m150-replSet",
+      version: 1,
+      members: [
+         { _id: 0, host : "localhost:27001" },
+         { _id: 1, host : "localhost:27002" },
+         { _id: 2, host : "localhost:27003" }
+      ]
+   }
+)
+Wait for the shell prompt to change from SECONDARY to PRIMARY. You may need to hit "Enter" a few times before the shell prompt changes.
+
+Then, create the user administrator using the following command:
+
+
+COPY
+db.createUser(
+   {
+     user: "globalAdminUser",
+     pwd: "5xd49$4%0bef#6c&b*d",
+     roles: [ { role: "userAdminAnyDatabase", db: "admin" } ]
+   }
+)
+
+db.createUser({ user: "clusterAdminUser", pwd: "6@09%aef&5d41!d37", roles: [{role: "clusterAdmin", db: "admin"}]});
+
+db.updateUser( "clusterManagerUser",
+               {
+                 customData : { employeeId : "0x3039" },
+                 roles : [
+                           { role : "read", db : "assets"  }
+                         ]
+                }
+             );
+
+
+mongo admin --host localhost:27006
+
